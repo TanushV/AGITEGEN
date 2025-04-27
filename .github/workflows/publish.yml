@@ -1,0 +1,14 @@
+name: publish
+on:
+  push:
+    tags: ['v*']
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: {id-token: write}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python bump_version.py
+      - uses: pypa/cibuildwheel@v2
+      - uses: pypa/gh-action-publish-pypi@v1
+        with: {password: ${{ secrets.PYPI_API_TOKEN }}}

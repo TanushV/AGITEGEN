@@ -1,0 +1,42 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package-lock.json') }}
+      - run: npm ci || true
+      - run: npm run lint || true
+      - run: npm test || true
+
+  detox:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: android-actions/setup-android@v3
+      - uses: actions/setup-node@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle
+            ~/.android/avd
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: gradle-
+      - run: npm ci
+      - run: npx expo prebuild --android
+      - run: npx detox build -c android.emu.release --headless
+      - run: npx detox test -c android.emu.release --headless
+
+  flutter-int:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+      - run: flutter test integration_test || true

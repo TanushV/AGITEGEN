@@ -1,0 +1,16 @@
+name: iOS Build
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref
+        required: true
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: ${{ github.event.inputs.ref }}}
+      - uses: ruby/setup-ruby@v1
+      - run: gem install fastlane
+      - run: fastlane build_ios_app
