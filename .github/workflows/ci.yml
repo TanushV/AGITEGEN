@@ -29,7 +29,7 @@ jobs:
             ~/.android/avd
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: gradle-
-      - run: npm ci
+      - run: npm install
       - run: npx expo prebuild --android
       - run: npx detox build -c android.emu.release --headless
       - run: npx detox test -c android.emu.release --headless

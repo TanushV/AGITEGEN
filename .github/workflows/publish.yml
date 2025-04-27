@@ -11,4 +11,5 @@ jobs:
       - run: python bump_version.py
       - uses: pypa/cibuildwheel@v2
       - uses: pypa/gh-action-publish-pypi@v1
-        with: {password: ${{ secrets.PYPI_API_TOKEN }}}
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
