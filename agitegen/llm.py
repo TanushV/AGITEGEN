@@ -54,8 +54,17 @@ def _run_local_tests(root: Path) -> tuple[bool, str]:
     logs: list[str] = []
     all_ok = True
     for cmd in commands:
-        if not shutil.which(cmd[0]):
-            # Skip commands that are not available in the local tool-chain
+        bin_name = cmd[0]
+        # Skip if the binary is not installed
+        if not shutil.which(bin_name):
+            continue
+        # Skip npm tests if no package.json
+        if bin_name == "npm" and not (root / "package.json").exists():
+            console.print("[yellow]Skipping npm tests: package.json not found.")
+            continue
+        # Skip flutter tests if no pubspec.yaml
+        if bin_name == "flutter" and not (root / "pubspec.yaml").exists():
+            console.print("[yellow]Skipping flutter tests: pubspec.yaml not found.")
             continue
         proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True)
         logs.append(proc.stdout + "\n" + proc.stderr)
