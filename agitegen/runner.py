@@ -9,3 +9,5 @@ def run_local():
         _spawn(["npx","expo","run:ios"])
     if shutil.which("flutter"):
         _spawn(["flutter","run","-d","chrome"])
+    if platform.system()=="Darwin" and shutil.which("flutter"):
+        _spawn(["flutter","run","-d","ios"])

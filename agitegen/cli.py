@@ -5,7 +5,7 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 from .utils import ensure_env, is_mac
-from .quota import ensure_openrouter_quota, ensure_github_minutes
+from .quota import ensure_openrouter_quota, ensure_github_minutes, measure_session_cost
 from .scaffolder import scaffold_project, install_backend_deps
 from .llm import collect_requirements, run_aider_until_green
 from .unmet import unmet_requirements
@@ -52,7 +52,8 @@ def build():
     root = Path.cwd()
     package = json.loads((root/"requirements.md").read_text())
     backend = "supabase" if (root/"src/supabaseClient.ts").exists() else "firebase" if (root/"src/firebaseClient.ts").exists() else "none"
-    run_aider_until_green(root, backend)
+    with measure_session_cost():
+        run_aider_until_green(root, backend)
     dispatch_ios_if_needed(
         subprocess.check_output(["gh","repo","view","--json","nameWithOwner"], text=True).split('"')[-2],
         subprocess.check_output(["git","rev-parse","HEAD"], text=True).strip()
