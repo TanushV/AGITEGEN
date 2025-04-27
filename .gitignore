@@ -1,0 +1,4 @@
+# Ignore Python cache directories
+__pycache__/
+# Ignore project egg-info metadata
+AgiteGen.egg-info/ 

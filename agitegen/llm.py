@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 import json, os, time
+import yaml
 from pathlib import Path
 import httpx, subprocess, shutil, tempfile
 from rich.console import Console
@@ -28,7 +29,7 @@ def _chat(model: str, msgs: list[dict[str,str]]):
     r.raise_for_status()
     return r.json()["choices"][0]["message"]["content"].strip()
 
-def collect_requirements() -> list[str]:
+def collect_requirements() -> list[dict]:
     msgs = [
         {"role":"system","content":"Ask clarifying questions. User will type DONE when finished."},
         {"role":"assistant","content":"Describe your app in one sentence."},
@@ -41,7 +42,15 @@ def collect_requirements() -> list[str]:
         print(reply); msgs.append({"role":"assistant","content":reply})
     spec = _chat(PLANNING_MODEL,msgs+[{"role":"assistant","content":"Now output YAML list under key `requirements` where each item is {symbol:<short>, desc:<text>}."}])
     console.print(spec)
-    return json.loads(json.dumps(spec))  # rely on YAML subset of JSON
+    # Parse the YAML-formatted specs into Python and return the list
+    parsed = yaml.safe_load(spec)
+    if isinstance(parsed, dict):
+        reqs = parsed.get("requirements", [])
+        if isinstance(reqs, list):
+            return reqs
+    # Fallback: no valid requirements list detected
+    console.print("[yellow]No valid YAML requirements list produced; continuing without explicit requirements.")
+    return []
 
 def _run_local_tests(root: Path) -> tuple[bool, str]:
     """Run the local lint + test suite. Returns (success, combined_log)."""

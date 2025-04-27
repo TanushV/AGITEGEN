@@ -43,7 +43,7 @@ def init(
     install_backend_deps(proj, backend)
     reqs = collect_requirements()
     (proj/"requirements.md").write_text(json.dumps({"requirements":reqs}, indent=2))
-    console.print(Panel("[green]Scaffold complete! Next steps:\n  1. cd into your project: `cd "+name+"`\n  2. Run the build process: `aidergen build`", 
+    console.print(Panel("[green]Scaffold complete! Next steps:\n  1. cd into your project: `cd "+name+"`\n  2. Run the build process: `agitegen build`", 
                       title="Initialization Successful", 
                       border_style="dim blue"))
 

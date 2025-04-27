@@ -1,9 +1,8 @@
-```markdown
-# AiderGen
+# AgiteGen
 
 *A one-command generator that turns an idea into a working cross-platform app.*
 
-AiderGen captures requirements with **Gemini 2.5 Pro**, writes code through **Aider AI**, fixes failing tests with **OpenAI o3**, scaffolds React-Native / Flutter / Next.js projects, wires optional Supabase or Firebase stubs, embeds the relevant backend docs for RAG, and ships a full CI/CD matrix—Detox E2E, Flutter integration tests, and remote iOS builds that fit inside GitHub’s free tier.
+AgiteGen captures requirements with **Gemini 2.5 Pro**, writes code through **Aider AI**, fixes failing tests with **OpenAI o3**, scaffolds React-Native / Flutter / Next.js projects, wires optional Supabase or Firebase stubs, embeds the relevant backend docs for RAG, and ships a full CI/CD matrix—Detox E2E, Flutter integration tests, and remote iOS builds that fit inside GitHub's free tier.
 
 ---
 
@@ -29,7 +28,7 @@ AiderGen captures requirements with **Gemini 2.5 Pro**, writes code through **Ai
 | **Backend Options**  | Supabase or Firebase stubs; real calls are commented until you wire secrets. |
 | **Doc-Aware RAG**    | Only the matching sections of the backend docs are embedded with **Chroma DB** and fed to Aider. |
 | **Test Matrix**      | ESLint + Jest unit tests · Detox Android/iOS E2E · Flutter `integration_test`. |
-| **Remote iOS Flow**  | Non-Mac users paste a PAT; a Fastlane `build_ios_app` job runs on GitHub’s macOS runner. |
+| **Remote iOS Flow**  | Non-Mac users paste a PAT; a Fastlane `build_ios_app` job runs on GitHub's macOS runner. |
 | **Quota Guards**     | Aborts if OpenRouter credits < 10 % or GitHub Actions minutes < 100. |
 | **Caching**          | Gradle, AVD & npm caches reduce CI runtime to ~ 5 minutes. |
 
@@ -37,19 +36,25 @@ AiderGen captures requirements with **Gemini 2.5 Pro**, writes code through **Ai
 
 ## Repository Map
 ```
-AiderGen/
-├─ pyproject.toml          · project metadata
-├─ bump_version.py         · syncs __version__ with latest git tag
-├─ detox.config.js         · Android E2E template
-├─ e2e/first.spec.js       · sample Detox test
+AgiteGen/
+├─ pyproject.toml          
+├─ bump_version.py         
+├─ detox.config.js         
+├─ e2e/first.spec.js       
 ├─ .github/workflows/
-│  ├─ ci.yml               · Linux unit + Detox + Flutter int
-│  ├─ ios.yml              · remote iOS build
-│  └─ publish.yml          · tag → PyPI wheels
-└─ aidergen/
-   ├─ cli.py        ├─ llm.py          ├─ quota.py
-   ├─ utils.py      ├─ unmet.py        ├─ embed.py
-   ├─ scaffolder.py ├─ runner.py       └─ ios.py
+│  ├─ ci.yml               
+│  ├─ ios.yml              
+│  └─ publish.yml          
+└─ agitegen/
+   ├─ cli.py
+   ├─ llm.py          
+   ├─ quota.py        
+   ├─ utils.py      
+   ├─ unmet.py        
+   ├─ embed.py
+   ├─ scaffolder.py 
+   ├─ runner.py       
+   └─ ios.py
 ```
 
 ---
@@ -67,28 +72,30 @@ AiderGen/
 
 ## Installation
 ```bash
-# recommended: isolated install
-pipx install aidergen
-
-# dev install
-git clone https://github.com/yourname/AiderGen.git
-cd AiderGen && pip install -e .
+# dev install from source (not yet published to PyPI)
+git clone https://github.com/yourname/AgiteGen.git
+cd AGITEGEN
+pip install -e .
 ```
 
 ---
 
 ## Quick Start
 ```bash
-export OPENROUTER_API_KEY=sk-…
+# after installing locally (see Installation section)
+export OPENROUTER_API_KEY=sk-...
 
 # scaffold a React-Native app targeting Web+Android, with Supabase stubs
-aidergen init MyApp --framework rn --targets web,android --backend supabase
+agitegen init MyApp --framework rn --targets web,android --backend supabase
 
 cd MyApp
-aidergen build   # Aider loops + tests
-aidergen run     # launches dev server & emulators
+# build and test
+agitegen build
+
+# launch dev server & emulators
+agitegen run
 ```
-*Need iOS on Windows/Linux?*  When prompted, paste a GitHub PAT with `workflow` scope; AiderGen builds the `.ipa` remotely and prints a download link.
+*Need iOS on Windows/Linux?*  When prompted, paste a GitHub PAT with `workflow` scope; AgiteGen builds the `.ipa` remotely and prints a download link.
 
 ---
 
@@ -114,6 +121,8 @@ Only matching doc chunks from Supabase/Firebase are embedded and injected into e
 ---
 
 ## Testing Locally
+
+`agitegen build` automatically runs linting and all available tests (unit, E2E, and integration) through the Aider loop. If you prefer to run tests manually, you can use:
 ```bash
 # unit + lint
 npm run lint && npm test
@@ -131,8 +140,8 @@ flutter test integration_test
 ## Troubleshooting
 | Symptom | Resolution |
 |---------|------------|
-| `ripgrep --json` not supported | Tool auto-installs a static rg 13 binary in `~/.aidergen/rg`. |
-| “OpenRouter credits low” error | Top-up credits or tweak threshold in `quota.py`. |
+| `ripgrep --json` not supported | Tool auto-installs a static rg 13 binary in `~/.agitegen/rg`. |
+| "OpenRouter credits low" error | Top-up credits or tweak threshold in `quota.py`. |
 | Detox emulator flakiness | Add `--retries 2` or switch to physical device. |
 
 ---

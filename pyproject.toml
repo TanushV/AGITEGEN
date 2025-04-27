@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name            = "AiderGen"
+name            = "AgiteGen"
 version         = "0.0.0"            # overwritten by bump_version.py in CI
 description     = "Automated cross-platform scaffold & build tool (Aider + Gemini 2.5 Pro + o3)"
 requires-python = ">=3.9"
@@ -17,9 +17,11 @@ dependencies    = [
   "pyyaml>=6",
   "jinja2>=3",
   "chromadb>=0.4.22",
-  "ripgrep_ago>=0.2",
   "tqdm>=4",
 ]
 
 [project.scripts]
-aidergen = "aidergen.cli:app"
+agitegen = "agitegen.cli:app"
+
+[tool.setuptools]
+packages = ["agitegen"]
