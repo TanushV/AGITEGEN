@@ -3,6 +3,7 @@ import os, subprocess, sys, json
 from pathlib import Path
 import typer
 from rich.console import Console
+from rich.panel import Panel
 from .utils import ensure_env, is_mac
 from .quota import ensure_openrouter_quota, ensure_github_minutes
 from .scaffolder import scaffold_project, install_backend_deps
@@ -12,6 +13,19 @@ from .runner import run_local
 from .ios import dispatch_ios_if_needed
 
 console = Console()
+
+ASCII_BOX_ART = r"""[bold blue]
+ ░▒▓██████▓▒░ ░▒▓██████▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓████████▓▒░▒▓██████▓▒░░▒▓████████▓▒░▒▓███████▓▒░  
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░     ░▒▓█▓▒░      ░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓████████▓▒░▒▓█▓▒▒▓███▓▒░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓██████▓▒░░▒▓█▓▒▒▓███▓▒░▒▓██████▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░      ░▒▓█▓▒░░▒▓█▓▒░ 
+░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░░▒▓█▓▒░  ░▒▓█▓▒░   ░▒▓████████▓▒░▒▓██████▓▒░░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░
+[/bold blue]"""
+
+console.print(ASCII_BOX_ART)
+
 app = typer.Typer(add_completion=False)
 
 @app.command()
@@ -29,7 +43,9 @@ def init(
     install_backend_deps(proj, backend)
     reqs = collect_requirements()
     (proj/"requirements.md").write_text(json.dumps({"requirements":reqs}, indent=2))
-    console.print("[green]Scaffold complete – run `aidergen build`")
+    console.print(Panel("[green]Scaffold complete! Next steps:\n  1. cd into your project: `cd "+name+"`\n  2. Run the build process: `aidergen build`", 
+                      title="Initialization Successful", 
+                      border_style="dim blue"))
 
 @app.command()
 def build():
