@@ -48,3 +48,40 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
       - run: flutter test integration_test || true
+
+  backend-matrix:
+    strategy:
+      matrix:
+        backend: [supabase, firebase]
+    runs-on: ubuntu-latest
+    env:
+      AIDERGEN_BACKEND: ${{ matrix.backend }}
+    services:
+      supabase:
+        image: supabase/local:v1.150
+        ports: ["54321:54321", "54322:54322"]
+        options: >-
+          --health-cmd "curl --fail http://localhost:54321/rest/v1/ || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - name: Install dependencies
+        run: |
+          if [ -f package.json ]; then npm ci; fi
+      - name: Install Firebase CLI (only for firebase backend)
+        if: matrix.backend == 'firebase'
+        run: npm i -g firebase-tools
+      - name: Start Firebase emulators (firebase backend)
+        if: matrix.backend == 'firebase'
+        run: |
+          firebase emulators:start --project demo --only auth,firestore --import=./state --export-on-exit=./state &
+          echo $! > emulator_pid
+      - name: Wait for services to become ready
+        run: sleep 15
+      - name: Run integration tests
+        run: |
+          npm run test:int || true
+      - name: Stop Firebase emulators
+        if: matrix.backend == 'firebase'
+        run: kill $(cat emulator_pid)

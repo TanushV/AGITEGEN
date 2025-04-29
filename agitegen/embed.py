@@ -3,7 +3,15 @@
 from __future__ import annotations
 import hashlib, httpx, os, re
 from pathlib import Path
-import chromadb
+
+_chromadb = None
+
+def _get_chromadb():
+    global _chromadb
+    if _chromadb is None:
+        import importlib
+        _chromadb = importlib.import_module("chromadb")
+    return _chromadb
 
 DOC_URLS = {
     "supabase": "https://raw.githubusercontent.com/supabase/docs/main/clients/js/README.md",
@@ -15,6 +23,7 @@ def embed_backend(backend: str, keywords: list[str], root: Path):
     chunks = re.split(r"\n##+\s", text)     # cheap segmenter
     store_dir = root / "embeddings"
     store_dir.mkdir(exist_ok=True)
+    chromadb = _get_chromadb()
     client = chromadb.PersistentClient(str(store_dir))
     col = client.get_or_create_collection("docs")
     for chunk in chunks:

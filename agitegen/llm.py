@@ -31,8 +31,15 @@ def _chat(model: str, msgs: list[dict[str,str]]):
 
 def collect_requirements() -> list[dict]:
     msgs = [
-        {"role":"system","content":"Ask clarifying questions. User will type DONE when finished."},
-        {"role":"assistant","content":"Describe your app in one sentence."},
+        {"role": "system", "content": "Ask clarifying questions. User will type DONE when finished."},
+        {"role": "assistant", "content": "Describe your app in one sentence."},
+        {
+            "role": "assistant",
+            "content": (
+                "Which backend do you plan to use first?\n"
+                "If you might switch or add others later, list them all.\n"
+                "For each one, describe the data tables / collections you foresee."),
+        },
     ]
     while True:
         user = input("🙋 ").strip()
@@ -125,8 +132,16 @@ def run_aider_until_green(root: Path, backend: str):
     raise SystemExit(1)
 
 def _get_backend_docs(root: Path, backend:str):
-    store = root/"embeddings"
-    if not store.exists(): return []
-    client = chromadb.PersistentClient(str(store))
-    col    = client.get_collection("docs")
-    return col.peek()["documents"]
+    try:
+        import chromadb  # local import to avoid mandatory dependency if embeddings not used
+    except ImportError:
+        return []
+    store = root / "embeddings"
+    if not store.exists():
+        return []
+    try:
+        client = chromadb.PersistentClient(str(store))
+        col = client.get_collection("docs")
+        return col.peek()["documents"]
+    except Exception:
+        return []

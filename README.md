@@ -85,8 +85,24 @@ pip install -e .
 # after installing locally (see Installation section)
 export OPENROUTER_API_KEY=sk-...
 
-# scaffold a React-Native app targeting Web+Android, with Supabase stubs
-agitegen init MyApp --framework rn --targets web,android --backend supabase
+# scaffold a new application (prompts for framework, targets, backend)
+agitegen init MyApp
+
+# Example interaction during init:
+# > Select a framework:
+# >   - rn: React Native
+# > Enter framework abbreviation (default: rn): rn 
+# > Select target platforms (comma-separated):
+# >   - web
+# >   - android
+# >   - ios
+# > Enter targets (default: web,android): web,android
+# > Select a backend provider:
+# >   - none
+# >   - supabase
+# >   - firebase
+# > Enter backend (default: none): supabase
+# > What are the requirements for this project? ...
 
 cd MyApp
 # build and test

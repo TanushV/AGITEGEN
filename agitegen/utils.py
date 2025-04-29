@@ -8,9 +8,13 @@ console = Console()
 
 def run_cmd(cmd: Sequence[str] | str, cwd: Path | None = None, check: bool=True):
     console.log(f"[grey]$ {' '.join(cmd) if isinstance(cmd, list) else cmd}")
-    r = subprocess.run(cmd, cwd=cwd, shell=isinstance(cmd, str))
-    if check and r.returncode != 0:
-        raise SystemExit(r.returncode)
+    try:
+        r = subprocess.run(cmd, cwd=cwd, shell=isinstance(cmd, str))
+        if check and r.returncode != 0:
+            console.print(f"[red]Command failed: {' '.join(cmd) if isinstance(cmd, list) else cmd}")
+            raise SystemExit(r.returncode)
+    except FileNotFoundError as e:
+        console.print(f"[yellow]Skipping command – binary not found: {e}")
 
 def ensure_env(var: str):
     if not os.getenv(var):
