@@ -56,12 +56,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       AIDERGEN_BACKEND: ${{ matrix.backend }}
-    services:
-      supabase:
-        image: public.ecr.aws/supabase/local:latest
-        ports: ["54321:54321", "54322:54322"]
-        options: >-
-          --health-cmd "curl --fail http://localhost:54321/rest/v1/ || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -72,16 +66,20 @@ jobs:
       - name: Install Firebase CLI (only for firebase backend)
         if: matrix.backend == 'firebase'
         run: npm i -g firebase-tools
-      - name: Start Firebase emulators (firebase backend)
-        if: matrix.backend == 'firebase'
+      - name: Setup backend services
         run: |
-          firebase emulators:start --project demo --only auth,firestore --import=./state --export-on-exit=./state &
-          echo $! > emulator_pid
-      - name: Wait for services to become ready
-        run: sleep 15
+          if [ "${{ matrix.backend }}" = "supabase" ]; then
+            npm i -g supabase@latest
+            supabase start -x studio,inbucket &
+            echo $! > backend_pid
+          else
+            firebase emulators:start --project demo --only auth,firestore --import=./state --export-on-exit=./state &
+            echo $! > backend_pid
+          fi
+      - name: Wait for backend to be ready
+        run: sleep 25
       - name: Run integration tests
         run: |
           npm run test:int || true
-      - name: Stop Firebase emulators
-        if: matrix.backend == 'firebase'
-        run: kill $(cat emulator_pid)
+      - name: Stop backend services
+        run: kill $(cat backend_pid)

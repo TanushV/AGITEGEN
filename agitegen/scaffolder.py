@@ -67,6 +67,10 @@ def scaffold_project(root: Path, framework:str, targets:list[str], backend:str):
         embed_backend(backend, ["auth", "user", "database"], root)
 
 def install_backend_deps(root: Path, backend:str):
-    # Static imports in `src/backend/index.ts` reference both SDKs. Install whichever is missing.
-    if backend in {"supabase", "firebase"}:
-        run_cmd("npm i @supabase/supabase-js firebase", cwd=root)
+    # Install client SDK and CLI tools for the chosen backend
+    if backend == "supabase":
+        # supabase-js SDK + Supabase CLI
+        run_cmd("npm i @supabase/supabase-js supabase --save-dev", cwd=root)
+    elif backend == "firebase":
+        # Firebase SDK + Firebase CLI
+        run_cmd("npm i firebase firebase-tools --save-dev", cwd=root)
