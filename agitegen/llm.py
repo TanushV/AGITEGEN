@@ -8,6 +8,7 @@ import httpx, subprocess, shutil, tempfile
 from rich.console import Console
 from .embed import embed_backend
 from .unmet import unmet_requirements
+from .tester import run_local_tests
 from .utils import run_cmd
 
 console = Console()
@@ -59,35 +60,6 @@ def collect_requirements() -> list[dict]:
     console.print("[yellow]No valid YAML requirements list produced; continuing without explicit requirements.")
     return []
 
-def _run_local_tests(root: Path) -> tuple[bool, str]:
-    """Run the local lint + test suite. Returns (success, combined_log)."""
-    commands = [
-        ["npm", "run", "lint"],
-        ["npm", "test"],
-        ["flutter", "test"],
-        ["flutter", "test", "integration_test"],
-    ]
-    logs: list[str] = []
-    all_ok = True
-    for cmd in commands:
-        bin_name = cmd[0]
-        # Skip if the binary is not installed
-        if not shutil.which(bin_name):
-            continue
-        # Skip npm tests if no package.json
-        if bin_name == "npm" and not (root / "package.json").exists():
-            console.print("[yellow]Skipping npm tests: package.json not found.")
-            continue
-        # Skip flutter tests if no pubspec.yaml
-        if bin_name == "flutter" and not (root / "pubspec.yaml").exists():
-            console.print("[yellow]Skipping flutter tests: pubspec.yaml not found.")
-            continue
-        proc = subprocess.run(cmd, cwd=root, capture_output=True, text=True)
-        logs.append(proc.stdout + "\n" + proc.stderr)
-        if proc.returncode != 0:
-            all_ok = False
-    return all_ok, "\n".join(logs)
-
 def run_aider_until_green(root: Path, backend: str):
     """Iterate with Aider until there are no unmet symbols **and** the local test suite passes.
 
@@ -96,7 +68,9 @@ def run_aider_until_green(root: Path, backend: str):
     passes = 0
     while passes < 5:
         unmet = unmet_requirements(root)
-        tests_ok, test_log = _run_local_tests(root)
+        # Determine framework based on existing files (simplified logic, might need refinement)
+        framework = "flutter" if (root / "pubspec.yaml").exists() else "rn"
+        tests_ok, test_log = run_local_tests(root, framework, backend)
         # If everything is green, we're done
         if not unmet and tests_ok:
             console.print("[green]✅ Local tests passed and no unmet symbols – build is green!")

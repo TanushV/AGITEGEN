@@ -58,7 +58,7 @@ jobs:
       AIDERGEN_BACKEND: ${{ matrix.backend }}
     services:
       supabase:
-        image: supabase/local:v1.150
+        image: supabase/local:latest
         ports: ["54321:54321", "54322:54322"]
         options: >-
           --health-cmd "curl --fail http://localhost:54321/rest/v1/ || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5
